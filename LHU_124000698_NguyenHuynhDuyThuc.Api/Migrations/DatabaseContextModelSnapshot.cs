@@ -74,6 +74,12 @@ namespace LHU_124000698_NguyenHuynhDuyThuc.Api.Migrations
                     b.Property<int>("NamHoc")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("NgayBatDau")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("NgayKetThuc")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("SiSoToiDa")
                         .HasColumnType("int");
 
@@ -82,6 +88,35 @@ namespace LHU_124000698_NguyenHuynhDuyThuc.Api.Migrations
                     b.HasIndex("MonHocID");
 
                     b.ToTable("LopHocPhan");
+
+                    b.HasData(
+                        new
+                        {
+                            LopHocPhanID = 1,
+                            HocKy = 1,
+                            MaLopHP = "LHP001",
+                            MonHocID = 1,
+                            NamHoc = 2024,
+                            SiSoToiDa = 40
+                        },
+                        new
+                        {
+                            LopHocPhanID = 2,
+                            HocKy = 1,
+                            MaLopHP = "LHP002",
+                            MonHocID = 1,
+                            NamHoc = 2024,
+                            SiSoToiDa = 45
+                        },
+                        new
+                        {
+                            LopHocPhanID = 3,
+                            HocKy = 2,
+                            MaLopHP = "LHP003",
+                            MonHocID = 2,
+                            NamHoc = 2024,
+                            SiSoToiDa = 40
+                        });
                 });
 
             modelBuilder.Entity("LHU_124000698_NguyenHuynhDuyThuc.Api.Database.Entities.MonHocEntity", b =>

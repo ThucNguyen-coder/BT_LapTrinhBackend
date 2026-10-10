@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32319.34
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LHU_124000698_NguyenHuynhDuyThuc.Api", "LHU_124000698_NguyenHuynhDuyThuc.Api\LHU_124000698_NguyenHuynhDuyThuc.Api.csproj", "{E1BF6F12-3F45-4346-A664-10103D5B32AB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LHU_124000698_NguyenHuynhDuyThuc.Api", "LHU_124000698_NguyenHuynhDuyThuc.Api\LHU_124000698_NguyenHuynhDuyThuc.Api.csproj", "{E1BF6F12-3F45-4346-A664-10103D5B32AB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -45,7 +45,9 @@ namespace LHU_124000698_NguyenHuynhDuyThuc.Api.Controllers
                 MaLopHP = req.MaLopHP,
                 HocKy = req.HocKy,
                 NamHoc = req.NamHoc,
-                SiSoToiDa = req.SiSoToiDa
+                SiSoToiDa = req.SiSoToiDa,
+                NgayBatDau = req.NgayBatDau,
+                NgayKetThuc = req.NgayKetThuc
             };
 
             await db.lopHocPhan.AddAsync(newLopHocPhan);
@@ -67,6 +69,8 @@ namespace LHU_124000698_NguyenHuynhDuyThuc.Api.Controllers
             lopHocPhan.HocKy = req.HocKy;
             lopHocPhan.NamHoc = req.NamHoc;
             lopHocPhan.SiSoToiDa = req.SiSoToiDa;
+            lopHocPhan.NgayBatDau = req.NgayBatDau;
+            lopHocPhan.NgayKetThuc = req.NgayKetThuc;
 
             await db.SaveChangesAsync();
             return Ok();
