@@ -1,10 +1,12 @@
 using LHU_124000698_NguyenHuynhDuyThuc.Api.Database.Entities;
+using LHU_124000698_NguyenHuynhDuyThuc.Api.Database.Seed;
 using Microsoft.EntityFrameworkCore;
 
 namespace LHU_124000698_NguyenHuynhDuyThuc.Api.Database
 {
     public class DatabaseContext : DbContext
     {
+        
         public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
         {
 
@@ -13,9 +15,14 @@ namespace LHU_124000698_NguyenHuynhDuyThuc.Api.Database
         public DbSet<LopHocPhanEntity> lopHocPhan => Set<LopHocPhanEntity>();
         public DbSet<SinhVienEntity> sinhVien => Set<SinhVienEntity>();
         public DbSet<DangKyEntity> dangKy => Set<DangKyEntity>();
+        public DbSet<NguoiDungEntity> NguoiDungs => Set<NguoiDungEntity>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.ApplyConfiguration(new MonHocSeed());
+            modelBuilder.ApplyConfiguration(new LopHocPhanSeed());
+            modelBuilder.ApplyConfiguration(new NguoiDungSeed());
 
             modelBuilder.Entity<SinhVienEntity>()
                 .HasIndex(s => s.MaSV)

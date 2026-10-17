@@ -1,6 +1,7 @@
 using LHU_124000698_NguyenHuynhDuyThuc.Api.Database;
 using LHU_124000698_NguyenHuynhDuyThuc.Api.Database.Entities;
 using LHU_124000698_NguyenHuynhDuyThuc.Api.Dto;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,7 @@ namespace LHU_124000698_NguyenHuynhDuyThuc.Api.Controllers
             db = context;
         }
 
+        [Authorize(Roles = "SinhVien,GiangVien,DaoTao")]
         [HttpGet("get-all")]
         public async Task<ActionResult<List<LopHocPhanDto>>> GetAll()
         {
@@ -36,6 +38,7 @@ namespace LHU_124000698_NguyenHuynhDuyThuc.Api.Controllers
             return Ok(danhSachLopHocPhan);
         }
 
+        [Authorize(Roles = "DaoTao")]
         [HttpPost("add")]
         public async Task<IActionResult> Add(LopHocPhanAddDto req)
         {
@@ -55,6 +58,7 @@ namespace LHU_124000698_NguyenHuynhDuyThuc.Api.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = "DaoTao")]
         [HttpPut("edit")]
         public async Task<IActionResult> edit(LopHocPhanEditDto req)
         {
@@ -76,6 +80,7 @@ namespace LHU_124000698_NguyenHuynhDuyThuc.Api.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = "DaoTao")]
         [HttpDelete("delete")]
         public async Task<IActionResult> delete(int id)
         {

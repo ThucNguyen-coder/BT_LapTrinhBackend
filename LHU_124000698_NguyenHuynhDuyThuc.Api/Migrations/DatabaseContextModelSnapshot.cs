@@ -92,6 +92,28 @@ namespace LHU_124000698_NguyenHuynhDuyThuc.Api.Migrations
                     b.HasData(
                         new
                         {
+                            LopHocPhanID = 5,
+                            HocKy = 1,
+                            MaLopHP = "IT101-01",
+                            MonHocID = 1,
+                            NamHoc = 2025,
+                            NgayBatDau = new DateTime(2025, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            NgayKetThuc = new DateTime(2025, 12, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            SiSoToiDa = 50
+                        },
+                        new
+                        {
+                            LopHocPhanID = 6,
+                            HocKy = 1,
+                            MaLopHP = "IT102-01",
+                            MonHocID = 2,
+                            NamHoc = 2025,
+                            NgayBatDau = new DateTime(2025, 9, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            NgayKetThuc = new DateTime(2025, 12, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            SiSoToiDa = 45
+                        },
+                        new
+                        {
                             LopHocPhanID = 1,
                             HocKy = 1,
                             MaLopHP = "LHP001",
@@ -150,6 +172,30 @@ namespace LHU_124000698_NguyenHuynhDuyThuc.Api.Migrations
                     b.HasData(
                         new
                         {
+                            MonHocID = 7,
+                            MaMon = "IT101",
+                            SoTietLyThuyet = 30,
+                            SoTinChi = 3,
+                            TenMon = "Nhập môn lập trình"
+                        },
+                        new
+                        {
+                            MonHocID = 8,
+                            MaMon = "IT102",
+                            SoTietLyThuyet = 30,
+                            SoTinChi = 3,
+                            TenMon = "Kỹ thuật lập trình"
+                        },
+                        new
+                        {
+                            MonHocID = 9,
+                            MaMon = "IT201",
+                            SoTietLyThuyet = 30,
+                            SoTinChi = 3,
+                            TenMon = "Cấu trúc dữ liệu"
+                        },
+                        new
+                        {
                             MonHocID = 1,
                             MaMon = "IT101",
                             SoTietLyThuyet = 30,
@@ -163,6 +209,70 @@ namespace LHU_124000698_NguyenHuynhDuyThuc.Api.Migrations
                             SoTietLyThuyet = 30,
                             SoTinChi = 3,
                             TenMon = "Kỹ thuật lập trình"
+                        });
+                });
+
+            modelBuilder.Entity("LHU_124000698_NguyenHuynhDuyThuc.Api.Database.Entities.NguoiDungEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int?>("GiangVienId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MatKhauHash")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<int?>("SinhVienId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TenDangNhap")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("VaiTro")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SinhVienId");
+
+                    b.HasIndex("TenDangNhap")
+                        .IsUnique();
+
+                    b.ToTable("NguoiDung");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            MatKhauHash = "$2a$11$ekQ0roCSaKIeuI.dEvVdi.TVJsM3bSqV95go7S3dmW80BqbM.K7xW",
+                            TenDangNhap = "daotao",
+                            VaiTro = "DaoTao"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            GiangVienId = 1,
+                            MatKhauHash = "$2a$11$z8/Lzh.7mjFx1OvCyEIyUeW1zQEURlcWuSPl51kNSUc2KGQc.yVdm",
+                            TenDangNhap = "giangvien",
+                            VaiTro = "GiangVien"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            MatKhauHash = "$2a$11$9cENMk9Zx3TtcyzVzXqpm.A4EsxkVQ0K4.KpBJQ50kdxJQihZu5ui",
+                            SinhVienId = 1,
+                            TenDangNhap = "sinhvien",
+                            VaiTro = "SinhVien"
                         });
                 });
 
@@ -253,6 +363,15 @@ namespace LHU_124000698_NguyenHuynhDuyThuc.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("MonHoc");
+                });
+
+            modelBuilder.Entity("LHU_124000698_NguyenHuynhDuyThuc.Api.Database.Entities.NguoiDungEntity", b =>
+                {
+                    b.HasOne("LHU_124000698_NguyenHuynhDuyThuc.Api.Database.Entities.SinhVienEntity", "SinhVien")
+                        .WithMany()
+                        .HasForeignKey("SinhVienId");
+
+                    b.Navigation("SinhVien");
                 });
 
             modelBuilder.Entity("LHU_124000698_NguyenHuynhDuyThuc.Api.Database.Entities.LopHocPhanEntity", b =>
