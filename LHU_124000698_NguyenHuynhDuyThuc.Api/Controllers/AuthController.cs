@@ -1,4 +1,5 @@
-﻿using LHU_124000698_NguyenHuynhDuyThuc.Api.Database;
+using LHU_124000698_NguyenHuynhDuyThuc.Api.Database;
+using LHU_124000698_NguyenHuynhDuyThuc.Api.Database.Entities;
 using LHU_124000698_NguyenHuynhDuyThuc.Api.Dto;
 using LHU_124000698_NguyenHuynhDuyThuc.Api.IServices;
 using Microsoft.AspNetCore.Authorization;
@@ -77,5 +78,63 @@ namespace LHU_124000698_NguyenHuynhDuyThuc.Api.Controllers
                 SinhVienId = sinhVienId
             });
         }
+
+        [Authorize]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto req)
+        {
+            // Trích xuất định danh người dùng từ Token JWT đã ký số (bảo vệ chống IDOR)
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+            NguoiDungEntity? user = null;
+
+            if (!string.IsNullOrEmpty(userIdStr) && int.TryParse(userIdStr, out int userId))
+            {
+                user = await _db.NguoiDungs.FirstOrDefaultAsync(u => u.Id == userId);
+            }
+            else if (!string.IsNullOrEmpty(username))
+            {
+                user = await _db.NguoiDungs.FirstOrDefaultAsync(u => u.TenDangNhap == username);
+            }
+
+            if (user == null)
+            {
+                return NotFound(new { message = "Không tìm thấy thông tin người dùng." });
+            }
+
+            // Nếu client có truyền TenDangNhap, kiểm tra để đảm bảo khớp với tài khoản trong Token
+            if (!string.IsNullOrWhiteSpace(req.TenDangNhap) &&
+                !string.Equals(req.TenDangNhap, user.TenDangNhap, StringComparison.OrdinalIgnoreCase))
+            {
+                return BadRequest(new { message = "Tên đăng nhập không khớp với tài khoản đang đăng nhập." });
+            }
+
+            // 1. Kiểm tra mật khẩu hiện tại bằng BCrypt.Verify
+            bool isCurrentPasswordValid = BCrypt.Net.BCrypt.Verify(req.MatKhauHienTai, user.MatKhauHash);
+            if (!isCurrentPasswordValid)
+            {
+                return BadRequest(new { message = "Mật khẩu hiện tại không chính xác." });
+            }
+
+            // 2. Kiểm tra xác nhận mật khẩu mới (nếu client có truyền)
+            if (!string.IsNullOrEmpty(req.XacNhanMatKhauMoi) && req.MatKhauMoi != req.XacNhanMatKhauMoi)
+            {
+                return BadRequest(new { message = "Xác nhận mật khẩu mới không trùng khớp." });
+            }
+
+            // 3. Kiểm tra mật khẩu mới không được trùng với mật khẩu hiện tại
+            if (BCrypt.Net.BCrypt.Verify(req.MatKhauMoi, user.MatKhauHash))
+            {
+                return BadRequest(new { message = "Mật khẩu mới không được trùng với mật khẩu hiện tại." });
+            }
+
+            // 4. Băm mật khẩu mới bằng BCrypt.HashPassword và cập nhật vào cơ sở dữ liệu
+            user.MatKhauHash = BCrypt.Net.BCrypt.HashPassword(req.MatKhauMoi);
+            await _db.SaveChangesAsync();
+
+            return Ok(new { message = "Đổi mật khẩu thành công." });
+        }
     }
 }
+
