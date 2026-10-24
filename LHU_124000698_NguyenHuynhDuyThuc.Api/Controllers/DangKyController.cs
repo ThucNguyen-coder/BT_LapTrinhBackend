@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using LHU_124000698_NguyenHuynhDuyThuc.Api.Dto;
 using Dapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Logging; // Đã thêm để dùng ILogger
 
 namespace LHU_124000698_NguyenHuynhDuyThuc.Api.Controllers
 {
@@ -13,14 +14,18 @@ namespace LHU_124000698_NguyenHuynhDuyThuc.Api.Controllers
     [ApiController]
     public class DangKyController : ControllerBase
     {
-        SqlConnection cn;
+        private readonly SqlConnection cn;
+        private readonly ILogger<DangKyController> _logger; // Đã thêm khai báo _logger
 
-        public DangKyController(SqlConnection connection)
+        // Inject thêm ILogger vào Constructor
+        public DangKyController(SqlConnection connection, ILogger<DangKyController> logger)
         {
             cn = connection;
+            _logger = logger;
         }
 
         [Authorize(Roles = "SinhVien")]
+        // Bỏ attribute [EnableRateLimiting] vì dự án dùng AspNetCoreRateLimit qua appsettings.json
         [HttpPost("them-moi")]
         public async Task<IActionResult> ThemMoi([FromBody] DangKyHocPhanAnToanDto req)
         {
@@ -28,6 +33,7 @@ namespace LHU_124000698_NguyenHuynhDuyThuc.Api.Controllers
             var sinhVienIdClaim = User.FindFirst("SinhVienId")?.Value;
             if (string.IsNullOrEmpty(sinhVienIdClaim))
             {
+                _logger.LogWarning("Yêu cầu đăng ký học phần bị từ chối do thiếu Claim SinhVienId trong Token.");
                 return Unauthorized("Token không hợp lệ hoặc thiếu thông tin định danh sinh viên.");
             }
 
@@ -45,7 +51,17 @@ namespace LHU_124000698_NguyenHuynhDuyThuc.Api.Controllers
             int ketQua = param.Get<int>("@KetQua");
             string thongBao = param.Get<string>("@ThongBao");
 
-            if (ketQua == 1) return Ok(new { message = "Đăng ký học phần thành công!", lopHocPhanId = req.LopHocPhanId, sinhVienId = currentSinhVienId });
+            if (ketQua == 1)
+            {
+                _logger.LogInformation("Sinh viên {SinhVienId} đăng ký thành công lớp {LopHocPhanId}",
+                    currentSinhVienId, req.LopHocPhanId);
+                return Ok(new
+                {
+                    message = "Đăng ký học phần thành công!",
+                    lopHocPhanId = req.LopHocPhanId,
+                    sinhVienId = currentSinhVienId
+                });
+            }
 
             return BadRequest(new { message = thongBao });
         }
