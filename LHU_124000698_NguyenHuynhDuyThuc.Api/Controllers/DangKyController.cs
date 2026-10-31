@@ -7,6 +7,8 @@ using LHU_124000698_NguyenHuynhDuyThuc.Api.Dto;
 using Dapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging; // Đã thêm để dùng ILogger
+using LHU_124000698_NguyenHuynhDuyThuc.Api.Dto.Common;
+using LHU_124000698_NguyenHuynhDuyThuc.Api.Database;
 
 namespace LHU_124000698_NguyenHuynhDuyThuc.Api.Controllers
 {
@@ -16,12 +18,13 @@ namespace LHU_124000698_NguyenHuynhDuyThuc.Api.Controllers
     {
         private readonly SqlConnection cn;
         private readonly ILogger<DangKyController> _logger; // Đã thêm khai báo _logger
-
+        private readonly DatabaseContext db;
         // Inject thêm ILogger vào Constructor
-        public DangKyController(SqlConnection connection, ILogger<DangKyController> logger)
+        public DangKyController(SqlConnection connection, DatabaseContext context, ILogger<DangKyController> logger)
         {
             cn = connection;
             _logger = logger;
+            db = context;
         }
 
         [Authorize(Roles = "SinhVien")]
@@ -64,6 +67,70 @@ namespace LHU_124000698_NguyenHuynhDuyThuc.Api.Controllers
             }
 
             return BadRequest(new { message = thongBao });
+        }
+
+        [Authorize(Roles = "GiangVien,DaoTao")]
+        [HttpGet("danh-sach-paged")]
+        public async Task<ActionResult<PagedResult<DangKyDto>>> GetDanhSachPaged(
+            [FromQuery] DangKyQueryParameters query)
+        {
+            var queryable = db.dangKy.AsNoTracking().AsQueryable();
+
+            if (query.SinhVienId.HasValue)
+                queryable = queryable.Where(d => d.SinhVienId == query.SinhVienId.Value);
+
+            if (query.LopHocPhanId.HasValue)
+                queryable = queryable.Where(d => d.LopHocPhanId == query.LopHocPhanId.Value);
+
+            if (!string.IsNullOrWhiteSpace(query.TrangThai))
+            {
+                var tt = query.TrangThai.Trim().ToLower();
+                queryable = queryable.Where(d => d.TrangThai.ToLower() == tt);
+            }
+
+            // Lọc theo khoảng ngày đăng ký
+            if (query.TuNgay.HasValue)
+                queryable = queryable.Where(d => d.NgayDangKy >= query.TuNgay.Value);
+
+            if (query.DenNgay.HasValue)
+                queryable = queryable.Where(d => d.NgayDangKy <= query.DenNgay.Value);
+
+            queryable = query.SortBy?.Trim().ToLower() switch
+            {
+                "masv" => query.IsAscending
+                    ? queryable.OrderBy(d => d.SinhVien.MaSV)
+                    : queryable.OrderByDescending(d => d.SinhVien.MaSV),
+                "malophp" => query.IsAscending
+                    ? queryable.OrderBy(d => d.LopHocPhan.MaLopHP)
+                    : queryable.OrderByDescending(d => d.LopHocPhan.MaLopHP),
+                _ => query.IsAscending
+                    ? queryable.OrderBy(d => d.NgayDangKy)
+                    : queryable.OrderByDescending(d => d.NgayDangKy)
+            };
+
+            var totalCount = await queryable.CountAsync();
+
+            // Truy xuất đa cấp: d.SinhVien, d.LopHocPhan.MonHoc (EF Core tự sinh JOIN 3 bảng)
+            var items = await queryable
+                .Skip((query.PageIndex - 1) * query.PageSize)
+                .Take(query.PageSize)
+                .Select(d => new DangKyDto
+                {
+                    DangKyId = d.DangKyId,
+                    SinhVienId = d.SinhVienId,
+                    MaSV = d.SinhVien.MaSV,
+                    HoTen = d.SinhVien.HoTen,
+                    LopHocPhanId = d.LopHocPhanId,
+                    MaLopHP = d.LopHocPhan.MaLopHP,
+                    TenMon = d.LopHocPhan.MonHoc.TenMon,      // Navigation cấp 3: DangKy -> LopHP -> MonHoc
+                    SoTinChi = d.LopHocPhan.MonHoc.SoTinChi,
+                    NgayDangKy = d.NgayDangKy,
+                    TrangThai = d.TrangThai
+                })
+                .ToListAsync();
+
+            return Ok(new PagedResult<DangKyDto>(
+                items, totalCount, query.PageIndex, query.PageSize));
         }
     }
 }

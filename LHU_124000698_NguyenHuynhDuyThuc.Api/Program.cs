@@ -122,6 +122,8 @@ builder.Services.AddAuthorization();
 //builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 //builder.Services.AddProblemDetails();
 
+builder.Services.AddScoped<SinhVienService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

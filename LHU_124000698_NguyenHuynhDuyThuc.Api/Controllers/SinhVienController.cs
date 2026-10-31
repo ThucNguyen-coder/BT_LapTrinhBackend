@@ -1,6 +1,9 @@
 ﻿using LHU_124000698_NguyenHuynhDuyThuc.Api.Database;
 using LHU_124000698_NguyenHuynhDuyThuc.Api.Database.Entities;
 using LHU_124000698_NguyenHuynhDuyThuc.Api.Dto;
+using LHU_124000698_NguyenHuynhDuyThuc.Api.Dto.Common;
+using LHU_124000698_NguyenHuynhDuyThuc.Api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,10 +15,22 @@ namespace LHU_124000698_NguyenHuynhDuyThuc.Api.Controllers
     public class SinhVienController : ControllerBase
     {
         DatabaseContext db;
+        private readonly SinhVienService _sinhVienService;
 
-        public SinhVienController(DatabaseContext context)
+        public SinhVienController(DatabaseContext context, SinhVienService sinhVienService)
         {
             db = context;
+            _sinhVienService = sinhVienService;
+        }
+
+        [Authorize(Roles = "SinhVien,GiangVien,DaoTao")]
+        [HttpGet("get-paged")]
+        public async Task<ActionResult<PagedResult<SinhVienDto>>> GetPaged(
+            [FromQuery] SinhVienQueryParameters query)
+        {
+            // Model Binder của ASP.NET Core tự động bóc tách các tham số từ Query String trên URL
+            var result = await _sinhVienService.GetPagedAsync(query);
+            return Ok(result);
         }
 
         [HttpGet("get-all")]
